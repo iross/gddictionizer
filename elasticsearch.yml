@@ -1,0 +1,2 @@
+cluster.name: "gdd_dev-cluster"
+network.host: 0.0.0.0
