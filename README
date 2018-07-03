@@ -1,0 +1,1 @@
+docker stop dummy; docker build . --rm -t gddictionizer; docker run -d --rm -v /home/iross/projects/gddictionizer/input:/input -v /home/iross/projects/gddictionizer/output:/output --name dummy gddictionizer; docker exec -it dummy /bin/bash
