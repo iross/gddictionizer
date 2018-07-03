@@ -353,7 +353,6 @@ class ElasticsearchHelper(object):
                     try:
                         matching_docs[doc["_id"]] = int(result[0])
                     except:
-			import pdb; pdb.set_trace()
                         print "Error in getting n_hits for this document!"
                         return {}
             if VERBOSE: print "%s scrolled for %s (%.2f per sec)" % (scan["hits"]["total"], ext_str, float(scan["hits"]["total"])/float(time.time() - start_time))
@@ -415,13 +414,15 @@ class ElasticsearchHelper(object):
                 },
                 scroll = "10m"
                 )
-            import pdb; pdb.set_trace()
+            m = re.compile(r"'(?:phraseFreq|termFreq)=(\d+).0'")
+            for doc in scan["hits"]["hits"]:
+                explanation = str(doc["_explanation"])
+                result = m.findall(explanation)
+                matching_docs[doc["_id"]] = int(result[0])
             scroll_id = scan["_scroll_id"]
             start_time = time.time()
-            m = re.compile(r"'(?:phraseFreq|termFreq)=(\d+).0'")
             print "Found %s hits" % scan["hits"]["total"]
             while (len(matching_docs) < scan["hits"]["total"]):
-                print "scrollscrollscrollscrollscroll"
                 scroll = self.es.scroll(scroll_id = scroll_id, scroll='10m', request_timeout=300)
                 scroll_id = scroll["_scroll_id"]
                 for doc in scroll["hits"]["hits"]:

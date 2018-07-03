@@ -4,6 +4,7 @@
 import GddConfig
 import ElasticsearchHelper
 import elasticsearch
+import time
 import glob
 import os
 
@@ -24,10 +25,13 @@ def match_term_to_docs(term, field, dict_id = None, classification=[], from_date
     """
     # match twice -- once with hierarchy, once without.
     if from_date is None:
+        print "No date"
         doc_matches_no_classification = esh.search_new_term(term, field, [], size=200)
     else:
+        print "date"
         doc_matches_no_classification = esh.search_term_from_date(term, from_date, field, [], size=200)
     if classification != []: # if there are addtl terms to consider, run another search
+        print "classification"
         if from_date is None:
             doc_matches = esh.search_new_term(term, field, classification, size=200)
         else:
@@ -41,10 +45,13 @@ for doc in glob.glob("/input/*.txt"):
     esh.es.index(index="temp_articles", doc_type="article", id=docid, body=doc)
     print "Inserting %s" % doc
 
+time.sleep(10)
+
 with open("/input/terms") as fin:
     for term in fin:
+        term = term.strip()
         # TODO: parse hierarchy and do things with it
-        res = esh.search_new_term(term.strip(), "contents", classification=[], size=200)
+        res = esh.search_new_term(term, "contents", classification=[], size=200)
         with open("/output/terms_docs", "a") as fout:
             for docid, hits in res.items():
                 fout.write("%s,%s,%s\n" % (term, docid, hits))
